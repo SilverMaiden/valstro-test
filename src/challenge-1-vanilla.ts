@@ -9,24 +9,27 @@ type Character = {
 };
 
 export function runVanillaApp() {
-  // we need to get the value of the multiplier;
+
+  // Multiplier Element Logic
   let multiplierElement: HTMLInputElement = document.getElementById(
     "multiplier"
   ) as HTMLInputElement;
 
-  let multiplierVal = parseInt(multiplierElement.value);
-  if (multiplierElement) {
-    multiplierElement.addEventListener("input", updateValue);
-
-    function updateValue(e: Event) {
+    // Handler/Event listener for multiplierElement
+    function handleMultiplierChange(e: Event) {
       if (multiplierElement) {
         multiplierElement.value = (e.target as HTMLInputElement).value;
-        multiplierVal = parseInt(multiplierElement.value)
-        console.log("multiplierVal: ", multiplierVal)
       }
     }
+
+    // Add event listener to multiplierElement
+    if (multiplierElement) {
+      multiplierElement.addEventListener("input", handleMultiplierChange);
+
   }
-  // This function loads data into the table
+
+
+  // LOAD DATA INTO TABLE - This function loads data into the table
   async function loadDataIntoTable(url: string, table: HTMLElement | null) {
     const tableBody: HTMLTableSectionElement | null | undefined =
       table?.querySelector("tbody");
@@ -41,17 +44,19 @@ export function runVanillaApp() {
           let { name, height, mass } = character;
           let intMass = parseInt(mass);
           let intHeight = parseInt(height);
+          let intMultiplier = parseInt(multiplierElement.value);
 
           // Initial character power calc
-          let characterPower =
+          let power =
             intMass && intHeight
-              ? (intMass * intHeight * multiplierVal).toString()
+              ? (intMass * intHeight * intMultiplier).toString()
               : "-";
+
           characterTableInfo.push({
             name,
             height,
             mass,
-            power: characterPower,
+            power,
           });
         });
       };
@@ -65,7 +70,7 @@ export function runVanillaApp() {
         parseCharacterData(data);
       }
 
-      // Clear the existing table
+      // Clear the table of any existing data
       tableBody.innerHTML = "";
 
       characterTableInfo.forEach((characterRow: Character) => {
@@ -81,6 +86,7 @@ export function runVanillaApp() {
     }
   }
 
+  // Run the loadDataIntoTable function
   loadDataIntoTable(
     "https://swapi.dev/api/people/",
     document.getElementById("table")
