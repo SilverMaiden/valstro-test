@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" type="image/svg+xml" href="/src/favicon.svg" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vite App</title>
+  </head>
+  <body>
+    <div id="apps">
+      <div id="vanilla">
+        <h2>Vanilla TS</h2>
+        Filter: <input placeholder="Filter by name" id="filter" /> Multiplier:
+        <input
+          id="multiplier"
+          placeholder="Multiplier"
+          type="number"
+          value="10"
+          defaultValue="10"
+          min="1"
+          max="20"
+        />
+        Press "Escape" to reset fields
+        <div id="loader" class="loader">Loading...</div>
+        <table width="100%" id="table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Height</th>
+              <th>Mass</th>
+              <th>Power</th>
+            </tr>
+          </thead>
+          <tbody id="tbody">
+            <!-- This is just an example, please remove -->
+            <tr>
+              <td>Example Character (please remove)</td>
+              <td>100</td>
+              <td>50</td>
+              <td>50000 (10 * 100 * 50)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div id="root"></div>
+    </div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
