@@ -33,7 +33,8 @@ const FunctionalComp = () => {
 
   useEffect(() => {
     console.log(cacheData);
-    if (!cacheData) {
+    let apiCallInProgress = localStorage.getItem("apiCallInProgress");
+    if (!cacheData && apiCallInProgress === "false") {
       setLoading(true);
       fetchCharacters()
         .then((response) => {

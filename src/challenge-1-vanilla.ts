@@ -13,6 +13,9 @@ export const DEFAULT_MULTIPLIER = "10";
 export const DEFAULT_FILTER_INPUT = "";
 
 //-------- Function TO PARSE THE DATA WE NEED --------//
+// The api response comes with a lot of unneeded data - this function
+// keeps only the data to be displayed, inline with the Character interface
+// defined above.
 export const parseCharacterData = (
   data: { results: any[] },
   characterTableInfo: Character[]
@@ -27,6 +30,8 @@ export const parseCharacterData = (
   });
 };
 
+// Function to calculate character power - it parses the string values
+// within the function
 export const calculatePower: (
   height: string,
   mass: string,
@@ -74,13 +79,22 @@ export const runVanillaApp: () => void = () => {
   let cacheData: string | null;
   let characterTableInfo: Character[] = [];
   const tableBody = document.querySelector("#tbody");
+
+  // To clear cache and test full functionality again after the initial
+  // app load, uncomment the line below.
   //localStorage.clear();
   let loader = document.getElementById("loader");
-
+  // We want to make sure the React challenge app doesn't make an additional
+  // api call on the first app launch, so we're setting a value in
+  // local storage to keep track of that.
+  localStorage.setItem("apiCallInProgress", "true");
   fetchCharacters()
     .then((response) => {
       cacheData = response;
       loadDataIntoTable();
+      // Once the api call has finished, we can set this to "false"
+      // and hide the loader.
+      localStorage.setItem("apiCallInProgress", "false");
       if (loader) {
         loader.style.display = "none";
       }
@@ -167,7 +181,4 @@ export const runVanillaApp: () => void = () => {
       });
     }
   };
-
-  //-------- Run the loadDataIntoTable function --------//
-  loadDataIntoTable();
 };
