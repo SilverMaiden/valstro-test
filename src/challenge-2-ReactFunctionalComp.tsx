@@ -8,12 +8,15 @@ import {
 } from "./challenge-1-vanilla";
 
 const FunctionalComp = () => {
-  let [cacheData, setCacheData] = useState<string | null>(
-    localStorage.getItem("tableData")
-  );
+    // State to store the characters
+    const [characters, setCharacters] = useState<Character[]>([]);
+
+  async function getCharacters() {
+    let characterTableInfo = await fetchCharacters();
+    return characterTableInfo;
+  }
   const [multiplier, setMultiplier] = useState<string>(DEFAULT_MULTIPLIER);
   const [loading, setLoading] = useState<Boolean>(false);
-  const [error, setError] = useState<Error>();
   const [filterInput, setFilterInput] = useState<string>("");
 
   const escFunction = useCallback((event: KeyboardEvent) => {
@@ -31,24 +34,22 @@ const FunctionalComp = () => {
     };
   }, [escFunction]);
 
-  useEffect(() => {
-    console.log(cacheData);
-    let apiCallInProgress = localStorage.getItem("apiCallInProgress");
-    if (!cacheData && apiCallInProgress === "false") {
-      setLoading(true);
-      fetchCharacters()
-        .then((response) => {
-          setLoading(false);
-          setCacheData(response);
-        })
-        .catch((error) => {
-          setError(error);
-        });
-    }
-  }, [localStorage.getItem("tableData")]);
+ // Effect to fetch the characters when the component is mounted
+ useEffect(() => {
+  // If the characters array is empty, fetch the characters from the API
+  if (characters.length === 0) {
+    setLoading(true);
+    // Get the characters from the cache or fetch them from the API
+    getCharacters().then((characters) => {
+      // Update the characters state with the fetched characters
+      setCharacters(characters);
+      setLoading(false);
+    });
+  }
+}, [characters]);
 
-  const characterTableInfo: Character[] = cacheData
-    ? JSON.parse(cacheData).filter((character: Character) => {
+  const characterTableInfo: Character[] = characters
+    ? characters.filter((character: Character) => {
         return character.name.toLowerCase().includes(filterInput);
       })
     : [];
