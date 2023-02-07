@@ -74,35 +74,12 @@ export const runVanillaApp: () => void = () => {
     "multiplier"
   ) as HTMLInputElement;
   const filterInput = document.getElementById("filter") as HTMLInputElement;
+  let loader = document.getElementById("loader");
 
   // -------- CACHE DATA -------- //
   let cacheData: string | null;
   let characterTableInfo: Character[] = [];
   const tableBody = document.querySelector("#tbody");
-
-  // To clear cache and test full functionality again after the initial
-  // app load, uncomment the line below.
-  //localStorage.clear();
-  let loader = document.getElementById("loader");
-  // We want to make sure the React challenge app doesn't make an additional
-  // api call on the first app launch, so we're setting a value in
-  // local storage to keep track of that.
-  localStorage.setItem("apiCallInProgress", "true");
-  fetchCharacters()
-    .then((response) => {
-      cacheData = response;
-      loadDataIntoTable();
-      // Once the api call has finished, we can set this to "false"
-      // and hide the loader.
-      localStorage.setItem("apiCallInProgress", "false");
-      if (loader) {
-        loader.style.display = "none";
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      throwError();
-    });
 
   //-------- MULTIPLIER CHANGE HANDLER --------//
   multiplierInput.addEventListener("input", () => {
@@ -181,4 +158,27 @@ export const runVanillaApp: () => void = () => {
       });
     }
   };
+
+  // To clear cache and test full functionality again after the initial
+  // app load, uncomment the line below.
+  //localStorage.clear();
+  // We want to make sure the React challenge app doesn't make an additional
+  // api call on the first app launch, so we're setting a value in
+  // local storage to keep track of that.
+  localStorage.setItem("apiCallInProgress", "true");
+  fetchCharacters()
+    .then((response) => {
+      cacheData = response;
+      loadDataIntoTable();
+      // Once the api call has finished, we can set this to "false"
+      // and hide the loader.
+      localStorage.setItem("apiCallInProgress", "false");
+      if (loader) {
+        loader.style.display = "none";
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+      throwError();
+    });
 };
