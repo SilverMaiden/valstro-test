@@ -16,18 +16,17 @@ export const DEFAULT_FILTER_INPUT = "";
 // The api response comes with a lot of unneeded data - this function
 // keeps only the data to be displayed, inline with the Character interface
 // defined above.
-export const parseCharacterData = (
-  data: { results: any[] },
-  characterTableInfo: Character[]
-) => {
+const parseCharacterData = (data: { results: any[] }) => {
+  let parsedData: Character[] = [];
   data.results.forEach((character) => {
     const { name, height, mass } = character;
-    characterTableInfo.push({
+    parsedData.push({
       name,
       height,
       mass,
     });
   });
+  return parsedData;
 };
 
 // Function to calculate character power - it parses the string values
@@ -46,38 +45,44 @@ export const calculatePower: (
       : "-";
   return power;
 };
-const throwError = async () => {
-  throw new Error(`Something went wrong with your api call.`);
-};
 //-------- FUNCTION FOR FETCHING CHARACTERS --------//
-export const fetchCharacters = async () => {
-  let tableData: string | null = localStorage.getItem("tableData");
-  const characterTableInfo: Character[] = [];
-  let nextPage = "https://swapi.dev/api/people/";
-  if (!tableData) {
-    while (nextPage) {
-      const response = await fetch(nextPage);
-      const data = await response.json();
-      parseCharacterData(data, characterTableInfo);
-      nextPage = data.next;
+
+export let fetchCharacters = (() => {
+  let cache: Promise<Character[]> | null = null;
+  let loader = document.getElementById("loader");
+
+  return async () => {
+    if (cache) {
+      return cache;
     }
-    let returnVal = JSON.stringify(characterTableInfo);
-    localStorage.setItem("tableData", returnVal);
-    return returnVal;
-  } else {
-    return tableData;
-  }
-};
+    let results: Character[] = [];
+    let nextUrl = "https://swapi.dev/api/people/";
+    while (nextUrl) {
+      if (loader && loader.style.display !== "none") {
+        loader.style.display = "";
+      }
+      const response = await fetch(nextUrl);
+      const data = await response.json();
+      const parsedData = parseCharacterData(data);
+      results = results.concat(parsedData);
+      nextUrl = data.next;
+    }
+    cache = Promise.resolve(results);
+    if (loader) {
+      loader.style.display = "none";
+    }
+
+    return cache;
+  };
+})();
 
 export const runVanillaApp: () => void = () => {
   const multiplierInput = document.getElementById(
     "multiplier"
   ) as HTMLInputElement;
   const filterInput = document.getElementById("filter") as HTMLInputElement;
-  let loader = document.getElementById("loader");
 
   // -------- CACHE DATA -------- //
-  let cacheData: string | null;
   let characterTableInfo: Character[] = [];
   const tableBody = document.querySelector("#tbody");
 
@@ -126,10 +131,14 @@ export const runVanillaApp: () => void = () => {
     }
   });
 
+  async function getCharacters() {
+    characterTableInfo = await fetchCharacters();
+    return characterTableInfo;
+  }
   //-------- LOAD DATA INTO TABLE --------//
   const loadDataIntoTable = async () => {
-    if (tableBody && cacheData) {
-      characterTableInfo = JSON.parse(cacheData);
+    let characterTableInfo = await getCharacters();
+    if (tableBody && characterTableInfo) {
       tableBody.innerHTML = "";
 
       characterTableInfo.forEach((characterRow: Character) => {
@@ -162,23 +171,5 @@ export const runVanillaApp: () => void = () => {
   // To clear cache and test full functionality again after the initial
   // app load, uncomment the line below.
   //localStorage.clear();
-  // We want to make sure the React challenge app doesn't make an additional
-  // api call on the first app launch, so we're setting a value in
-  // local storage to keep track of that.
-  localStorage.setItem("apiCallInProgress", "true");
-  fetchCharacters()
-    .then((response) => {
-      cacheData = response;
-      loadDataIntoTable();
-      // Once the api call has finished, we can set this to "false"
-      // and hide the loader.
-      localStorage.setItem("apiCallInProgress", "false");
-      if (loader) {
-        loader.style.display = "none";
-      }
-    })
-    .catch((error) => {
-      console.log(error);
-      throwError();
-    });
+  loadDataIntoTable();
 };
