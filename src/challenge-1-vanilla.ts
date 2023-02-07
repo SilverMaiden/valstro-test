@@ -168,8 +168,5 @@ export const runVanillaApp: () => void = () => {
     }
   };
 
-  // To clear cache and test full functionality again after the initial
-  // app load, uncomment the line below.
-  //localStorage.clear();
   loadDataIntoTable();
 };
